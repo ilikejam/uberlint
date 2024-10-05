@@ -1,0 +1,24 @@
+{
+    "extends": ["airbnb", "plugin:prettier/recommended"],
+    "plugins": [
+        "prettier",
+        "immutable"
+    ],
+    "rules": {
+        "prettier/prettier": "error",
+        "immutable/no-mutation": "warn",
+        "import/prefer-default-export": "off",
+        "import/no-default-export": "error",
+        "import/no-unresolved": "off",
+        "no-implicit-coercion": "error"
+    },
+    "env": {
+        "jest": true,
+        "node": true
+    },
+    "settings": {
+        "react": {
+            "version": "detect"
+        }
+    }
+}

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+export LINT_IMAGE=ilikejam/uberlint
+
+pull_docker() {
+    docker pull "$LINT_IMAGE" || echo "Docker pull failed. Continuing." >&2
+}

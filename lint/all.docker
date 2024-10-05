@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -e
+
+# Set up read-write overlay /repo -> /repo-rw
+mkdir /dev/shm/repo-work /dev/shm/repo-upper /repo-rw
+mount -t overlay none -o lowerdir=/repo,upperdir=/dev/shm/repo-upper,workdir=/dev/shm/repo-work /repo-rw
+
+# Move to read-write repo
+cd /repo-rw
+
+ROOT_DIR="$(pwd)"
+readonly ROOT_DIR
+export ROOT_DIR
+export ERROR=false
+export LINTERS=()
+
+for source in "$(dirname "$0")"/lib/*; do
+    # shellcheck source=/dev/null
+    . "$source"
+done
+
+main() {
+    ALLFILES="$(find_all_files)"
+    FILES="$(filter_ignores "$ALLFILES")"
+
+    if [[ -n "$FILES" ]]; then
+        echo "Running linters" 2>&1
+        if [[ -f .lintforce ]]; then
+            echo "Found .lintforce"
+            for linter in "${LINTERS[@]}"; do
+                force_files=$(grep "^$linter  *" .lintforce | sed "s/^$linter  *//")
+                commit_force_files="$(comm -1 -2 <(echo "$force_files" | sort) <(echo "$FILES" | sort))"
+                "$linter" -f "$commit_force_files"
+            done
+        fi
+        for linter in "${LINTERS[@]}"; do
+            "$linter" "$FILES"
+        done
+    else
+        echo "No files found to lint" 1>&2
+    fi
+}
+
+# ----- GO!
+main
+do_exit "$ERROR"

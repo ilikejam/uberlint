@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+export LINTERS+=('rubo')
+
+rubo() {
+    local lint_files
+    if [[ $1 == "-f" ]]; then
+        lint_files="$2"
+    else
+        local files="$1"
+        local fpattern='\.rb$'
+        lint_files="$(echo "$files" | grep -E "$fpattern" || true)"
+    fi
+    while read -r file; do
+        rubocop "$file" || fail "$file" rubocop
+    done < <(echo "$lint_files" | sed '/^$/d')
+}
+
+rubo-describe() {
+    echo "Lint ruby files with rubocop"
+}

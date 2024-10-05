@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+pull_hooks() {
+    local dir="$1"
+    ( cd "$dir" || return
+      echo "Pulling hooks repo... " 2>&1
+      git pull || echo "Hook repo pull failed. Continuing." >&2 )
+}
+
+get_commit() {
+    # Are we running against HEAD or a new repo?
+    if git rev-parse --verify HEAD &> /dev/null; then
+        echo "HEAD"
+    else
+        # empty tree SHA
+        echo "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+    fi
+}
+
+new_and_edited_files() {
+    # echo's a list of edited or new or moved files
+    local head="$1"
+    git diff-index --name-only --cached --diff-filter=ACMR "$head"
+}
+
+re_add_files() {
+    # Add a list of files back into the staging area
+    local files="$1"
+    while read -r file; do
+        [[ -z $file ]] || git add "$file"
+    done < <(echo "$files")
+}

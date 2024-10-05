@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+export LINTERS+=('shellchk')
+
+shellchk() {
+    if [[ $1 == "-f" ]]; then
+        local force=true
+        local files="$2"
+    else
+        local force=false
+        local files="$1"
+    fi
+    while read -r file; do
+        # Don't lint jinja2 templates as shell scripts
+        if [[ $file == *.j2 ]]; then
+            continue
+        fi
+        if $force || file "$file" | grep -Eq '(shell|ksh|bash) script'; then
+            shellcheck "$file" || fail "$file" shellcheck
+        fi
+    done < <(echo "$files" | sed '/^$/d')
+}
+
+shellchk-describe() {
+    echo "Lint shell scripts with shellcheck"
+}

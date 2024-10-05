@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+export LINTERS+=('ansiblint')
+
+ansiblint() {
+    local lint_files
+    if [[ $1 == "-f" ]]; then
+        lint_files="$2"
+    else
+        local files="$1"
+        local fpattern='\.(yml|yaml)$'
+        local fexclpattern='/files/[^/]*.yml'
+        lint_files="$(echo "$files" | grep -E "$fpattern" | grep -v "$fexclpattern" || true)"
+    fi
+    mapfile -t ansiblecfgs < <(find ./* -name ansible.cfg)
+    if [[ ${#ansiblecfgs[@]} -gt 0 ]]; then
+        ANSIBLE_LOCAL_TEMP="$(mktemp -d)"
+        export ANSIBLE_LOCAL_TEMP
+        local temp
+        temp="$(mktemp -d)"
+        declare -a ansibleroots
+        declare -A rootfilelist
+        for ansiblecfg in "${ansiblecfgs[@]}"; do
+            ansibleroots+=( "$(dirname "$ansiblecfg" | sed 's|$|/|; s|^./||')" )
+        done
+        i=0
+        for ansibleroot in "${ansibleroots[@]}"; do
+            rootfilelist[x"$ansibleroot"]="$temp"/$i
+            (( ++i ))
+        done
+        while read -r file; do
+            local longestroot=""
+            local foundroot=false
+            for ansibleroot in "${ansibleroots[@]}"; do
+                if [[ $file == ${ansibleroot}* ]]; then
+                    if [[ ${#ansibleroot} -ge ${#longestroot} ]]; then
+                        longestroot=$ansibleroot
+                        foundroot=true
+                    fi
+                fi
+            done
+            if $foundroot; then
+                echo "${file#"$longestroot"}" >> "${rootfilelist[x"$longestroot"]}"
+            fi
+        done < <(echo "$lint_files" | sed '/^$/d')
+
+        for ansibleroot in "${ansibleroots[@]}"; do
+            if [[ -f "${rootfilelist[x"$ansibleroot"]}" ]]; then
+               cd "$PWD"/"$ansibleroot" || exit 1
+               tr '\n' '\0' < "${rootfilelist[x"$ansibleroot"]}" | xargs -0 ansible-lint -q || fail "File under ./$ansibleroot" ansible-lint
+               cd "$ROOT_DIR" || exit 1
+            fi
+        done
+        rm -rf -- "$ANSIBLE_LOCAL_TEMP" "$temp"
+    fi
+}
+
+ansiblint-describe() {
+    echo "Lint ansible files with ansible-lint"
+}

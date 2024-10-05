@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+export LINTERS+=('jsonchk')
+
+jsonchk() {
+    local lint_files
+    if [[ $1 == "-f" ]]; then
+        lint_files="$2"
+    else
+        local files="$1"
+        local fpattern='\.json$'
+        lint_files="$(echo "$files" | grep -E "$fpattern" || true)"
+    fi
+    while read -r file; do
+        if ! jqerr="$(jq . "$file" 2>&1 >/dev/null)" ; then
+            echo -n "$file: "
+            echo "$jqerr"
+            fail "$file" jq
+        fi
+    done < <(echo "$lint_files" | sed '/^$/d')
+}
+
+jsonchk-describe() {
+    echo "Test json files for syntax with jq"
+}

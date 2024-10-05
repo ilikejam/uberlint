@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC1091
+set -e
+
+if [[ -z $GLOBALHOOKNOPULL ]]; then
+    source "$(dirname "$0")"/lib/_git
+    pull_hooks "$(dirname "$0")"
+    source "$(dirname "$0")"/lib/_docker
+    pull_docker
+    # Re-run this script with GLOBALHOOKNOPULL set to continue
+    exec env GLOBALHOOKNOPULL=1 "$0"
+else
+    source "$(dirname "$0")"/lib/_docker
+    git_root="$(git rev-parse --show-toplevel)"
+    cd "$git_root"
+    docker run --cap-add=SYS_ADMIN -it --rm --env TERM="$TERM" --env ANSIBLE_ROLES_PATH=roles/services:roles/base:roles/contrib -v "$(pwd)":/repo:ro "$LINT_IMAGE"
+fi

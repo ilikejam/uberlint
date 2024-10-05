@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+export LINTERS=()
+
+for source in "$(dirname "$0")"/lib/*; do
+    # shellcheck source=/dev/null
+    . "$source"
+done
+for linter in "${LINTERS[@]}"; do
+    echo "${linter}§ $("$linter"-describe)"
+done | column -s§ -t

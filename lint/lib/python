@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+export LINTERS+=('blacken')
+
+blacken() {
+    local lint_files
+    if [[ $1 == "-f" ]]; then
+        lint_files="$2"
+    else
+        local files="$1"
+        local fpattern='\.py$'
+        lint_files="$(echo "$files" | grep -E "$fpattern" || true)"
+    fi
+    while read -r file; do
+        black -q --check --diff "$file" || fail "$file" black
+    done < <(echo "$lint_files" | sed '/^$/d')
+}
+
+blacken-describe() {
+    echo "Lint python files with black"
+}
+
+export LINTERS+=('isorted')
+
+isorted() {
+    local lint_files
+    if [[ $1 == "-f" ]]; then
+        lint_files="$2"
+    else
+        local files="$1"
+        local fpattern='\.py$'
+        lint_files="$(echo "$files" | grep -E "$fpattern" || true)"
+    fi
+    while read -r file; do
+        isort --profile=black --check-only "$file" || fail "$file" isort
+    done < <(echo "$lint_files" | sed '/^$/d')
+}
+
+isorted-describe() {
+    echo "Lint python files with isort's black profile"
+}
+
+export LINTERS+=('mypyed')
+
+mypyed() {
+    local lint_files
+    if [[ $1 == "-f" ]]; then
+        lint_files="$2"
+    else
+        local files="$1"
+        local fpattern='\.py$'
+        lint_files="$(echo "$files" | grep -E "$fpattern" || true)"
+    fi
+    while read -r file; do
+        mypy --ignore-missing-imports --disable-error-code=import-untyped --no-error-summary "$file" || fail "$file" mypy
+    done < <(echo "$lint_files" | sed '/^$/d')
+}
+
+mypyed-describe() {
+    echo "Lint python files with mypy"
+}
+

@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+export LINTERS+=('makechk')
+
+# Linting is pretty hard for Makefiles, so just test that
+#  all, test, and clean are implemented for top level Makefile's
+#  and the rest dry run OK
+
+makechk() {
+    local lint_files
+    if [[ $1 == "-f" ]]; then
+        lint_files="$2"
+    else
+        local files="$1"
+        local fpattern='Makefile$'
+        lint_files="$(echo "$files" | grep -E "$fpattern" || true)"
+    fi
+    while read -r file; do
+        cd "$ROOT_DIR/$(dirname "$file")" || export ERROR=true
+        if [[ "$file" == "Makefile" ]]; then
+            # Special case for top level Makefile
+            make -n all > /dev/null || fail "$file" make
+            make -n test > /dev/null || fail "$file" make
+            make -n clean > /dev/null || fail "$file" make
+        else
+            make -n > /dev/null || fail "$file" make
+        fi
+    done < <(echo "$lint_files" | sed '/^$/d')
+    cd "$ROOT_DIR" || export ERROR=true
+}
+
+makechk-describe() {
+    echo "Test Makefiles for syntax and required targets"
+}

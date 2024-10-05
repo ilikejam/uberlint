@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+RED="$(tput setaf 1)"
+export RED
+RESET="$(tput sgr0)"
+export RESET
+
+fail() {
+    local file="$1"
+    local linter="$2"
+    printf "%s\n" "${RED}$file failed linter $linter${RESET}"
+    export ERROR=true
+}
+
+filter_ignores() {
+    local files="$1"
+    if [[ -f .lintignore ]]; then
+        echo "Found lintignore" >&2
+        local dummy
+        dummy="$(mktemp -d)"
+        include="$(rsync -n --files-from=<(echo "$files") \
+              --exclude-from=.lintignore \
+              --out-format=%n \
+              ./ "$dummy")"
+        while read -r file; do
+            [[ -d "$file" ]] || echo "$file"
+        done < <(echo "$include")
+        rmdir "$dummy"
+    else
+        echo "$files"
+    fi
+}
+
+run_local_pre_commit() {
+    if [[ -f .pre-commit ]]; then
+        if ! .pre-commit; then
+            export ERROR=true
+        fi
+    fi
+}
+
+find_all_files() {
+    find ./* -type f | sed 's|^./||'
+}
+
+do_exit() {
+    local error="$1"
+    if $error; then
+        echo "Linting failed!" 1>&2
+        exit 1
+    else
+        exit 0
+    fi
+}

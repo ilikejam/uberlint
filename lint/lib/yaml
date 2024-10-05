@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+export LINTERS+=('yamlint')
+
+yamlint() {
+    local lint_files
+    if [[ $1 == "-f" ]]; then
+        lint_files="$2"
+    else
+        local files="$1"
+        local fpattern='\.(yml|yaml)$'
+        lint_files="$(echo "$files" | grep -E "$fpattern" || true)"
+    fi
+    while read -r file; do
+        if ! yamllint -d '{extends: relaxed, rules: {line-length: disable}}' "$file" ; then
+            fail "$file" yamllint
+        fi
+    done < <(echo "$lint_files" | sed '/^$/d')
+}
+
+yamlint-describe() {
+    echo "Lint YAML files with yamllint"
+}

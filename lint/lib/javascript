@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+export LINTERS+=('ecmalint')
+
+ecmalint() {
+    local lint_files
+    if [[ $1 == "-f" ]]; then
+        lint_files="$2"
+    else
+        local files="$1"
+        local fpattern='\.js$'
+        lint_files="$(echo "$files" | grep -E "$fpattern" || true)"
+    fi
+    rm -rf node_modules eslintrc.json
+    ln -s /usr/local/lib/node_modules .
+    ln -s /eslintrc.json .
+    while read -r file; do
+        if ! eslint --no-eslintrc -c eslintrc.json "$file" ; then
+            fail "$file" eslint
+        fi
+    done < <(echo "$lint_files" | sed '/^$/d')
+}
+
+ecmalint-describe() {
+    echo "Lint javascript files with eslint"
+}

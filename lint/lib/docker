@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+export LINTERS+=('dockerlint')
+
+dockerlint() {
+    local lint_files
+    if [[ $1 == "-f" ]]; then
+        lint_files="$2"
+    else
+        local files="$1"
+        local fpattern='Dockerfile$'
+        lint_files="$(echo "$files" | grep -E "$fpattern" || true)"
+    fi
+    while read -r file; do
+        hadolint "$file" || fail "$file" dockerlint
+    done < <(echo "$lint_files" | sed '/^$/d')
+}
+
+dockerlint-describe() {
+    echo "Lint Dockerfiles with hadolint"
+}
