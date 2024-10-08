@@ -41,6 +41,7 @@ RUN apt-get update && \
         isort \
         jmespath \
         mypy \
+        ruff \
         yamllint && \
     npm install --global \
         prettier \

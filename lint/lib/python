@@ -57,6 +57,26 @@ mypyed() {
 }
 
 mypyed-describe() {
-    echo "Lint python files with mypy"
+    echo "Type-check python files with mypy"
+}
+
+export LINTERS+=('ruffen')
+
+ruffen() {
+    local lint_files
+    if [[ $1 == "-f" ]]; then
+        lint_files="$2"
+    else
+        local files="$1"
+        local fpattern='\.py$'
+        lint_files="$(echo "$files" | grep -E "$fpattern" || true)"
+    fi
+    while read -r file; do
+        ruff check -q "$file" || fail "$file" ruff
+    done < <(echo "$lint_files" | sed '/^$/d')
+}
+
+ruffen-describe() {
+    echo "Lint python files with ruff"
 }
 
