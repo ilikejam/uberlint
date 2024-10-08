@@ -8,4 +8,9 @@ test:
 
 .PHONY: docker
 docker:
-	docker build --progress=plain --rm -t uberlint .
+	docker buildx create --name uberlint || true
+	docker buildx build --builder uberlint --progress=plain --platform linux/amd64,linux/arm64/v8 -t uberlint .
+
+push:
+	docker buildx create --name uberlint || true
+	docker buildx build --builder uberlint --progress=plain --platform linux/amd64,linux/arm64/v8 -t ilikejam/uberlint --push .
