@@ -9,7 +9,7 @@ Some righteously opinionated linters for Python, bash, Ansible et al, rolled int
   Ansible root dirs are detected by the presence of an `ansible.cfg` file, and ansible-lint will be run from each directory where that file is found for the files under it.
 * `eslint` for Javascript sources.  
   The `airbnb` style is used, with some reasonable defaults. Due to the questionable way eslint works, the eslintrc from the linted code is replaced and the linter's npm nodules are loaded in with an overlay.
-* `cfn-format` format check for Cloudformation files.  
+* `rain fmt` format check for Cloudformation files.  
   We only detect yaml/yml files with an `AWSTemplateFormatVersion` declaration, so add any other CF files to `.lintforce` (see below).
 * `cfn-lint` lint for Cloudformation files.  
   We only detect yaml/yml files with an `AWSTemplateFormatVersion` declaration, so add any other CF files to `.lintforce` (see below).

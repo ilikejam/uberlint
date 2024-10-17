@@ -5,10 +5,11 @@ ARG ANSIBLELINTVERS=6.12.2
 ARG HADOLINTVERS=v2.12.0
 ARG HADOLINTSUMAMD=56de6d5e5ec427e17b74fa48d51271c7fc0d61244bf5c90e828aab8362d55010
 ARG HADOLINTSUMARM=5798551bf19f33951881f15eb238f90aef023f11e7ec7e9f4c37961cb87c5df6
-ARG CFNFORMATVERS=v1.1.3
-ARG CFNFORMATSUMAMD=918e00633bfba937109ba78b5da3d64a51a25d48640cfa8e85ef416dc3735eb8
-ARG CFNFORMATSUMARM=300e8e3b4357583f5bee19b74375c4b2131736e01a9de152b771732e8585c1e9
+ARG RAINVERS=v1.16.1
+ARG RAINSUMAMD=be661510fbbc57e2e85d9e9617d69b261bba6f2b0d5725319397730bf77b88bf
+ARG RAINSUMARM=f42412c622ba150d27aa4fd94014610cc73e9254dbb1a5dc9b05438af27374e3
 ARG RUBOCOPVERS=1.64.1
+ARG CACHEBUST=__NONCE__
 ENV DEBIAN_FRONTEND=noninteractive
 SHELL [ "/bin/bash", "-o", "pipefail", "-c" ]
 
@@ -59,12 +60,12 @@ RUN apt-get update && \
             echo "$HADOLINTSUMAMD  /usr/bin/hadolint" | sha256sum --check && \
             chmod +x /usr/bin/hadolint && \
             curl -f -L -O \
-                https://github.com/awslabs/aws-cloudformation-template-formatter/releases/download/$CFNFORMATVERS/cfn-format-${CFNFORMATVERS}_linux-amd64.zip && \
-            unzip cfn-format-${CFNFORMATVERS}_linux-amd64.zip cfn-format-${CFNFORMATVERS}_linux-amd64/cfn-format && \
-            cp cfn-format-${CFNFORMATVERS}_linux-amd64/cfn-format /usr/bin/cfn-format && \
-            echo "$CFNFORMATSUMAMD  /usr/bin/cfn-format" | sha256sum --check && \
-            chmod +x /usr/bin/cfn-format && \
-            rm -rf cfn-format-${CFNFORMATVERS}_linux-amd64.zip cfn-format-${CFNFORMATVERS}_linux-amd64 \
+                https://github.com/aws-cloudformation/rain/releases/download/$RAINVERS/rain-${RAINVERS}_linux-amd64.zip && \
+            unzip rain-${RAINVERS}_linux-amd64.zip rain-${RAINVERS}_linux-amd64/rain && \
+            cp rain-${RAINVERS}_linux-amd64/rain /usr/bin/rain && \
+            echo "$RAINSUMAMD  /usr/bin/rain" | sha256sum --check && \
+            chmod +x /usr/bin/rain && \
+            rm -rf rain-${RAINVERS}_linux-amd64.zip rain-${RAINVERS}_linux-amd64/ \
             ;; \
         aarch64) \
             curl -f -L -o /usr/bin/hadolint \
@@ -72,12 +73,12 @@ RUN apt-get update && \
             echo "$HADOLINTSUMARM  /usr/bin/hadolint" | sha256sum --check && \
             chmod +x /usr/bin/hadolint && \
             curl -f -L -O \
-                https://github.com/awslabs/aws-cloudformation-template-formatter/releases/download/$CFNFORMATVERS/cfn-format-${CFNFORMATVERS}_linux-arm64.zip && \
-            unzip cfn-format-${CFNFORMATVERS}_linux-arm64.zip cfn-format-${CFNFORMATVERS}_linux-arm64/cfn-format && \
-            cp cfn-format-${CFNFORMATVERS}_linux-arm64/cfn-format /usr/bin/cfn-format && \
-            echo "$CFNFORMATSUMARM  /usr/bin/cfn-format" | sha256sum --check && \
-            chmod +x /usr/bin/cfn-format && \
-            rm -rf cfn-format-${CFNFORMATVERS}_linux-arm64.zip cfn-format-${CFNFORMATVERS}_linux-arm64 \
+                https://github.com/aws-cloudformation/rain/releases/download/$RAINVERS/rain-${RAINVERS}_linux-arm64.zip && \
+            unzip rain-${RAINVERS}_linux-arm64.zip rain-${RAINVERS}_linux-arm64/rain && \
+            cp rain-${RAINVERS}_linux-arm64/rain /usr/bin/rain && \
+            echo "$RAINSUMARM  /usr/bin/rain" | sha256sum --check && \
+            chmod +x /usr/bin/rain && \
+            rm -rf rain-${RAINVERS}_linux-arm64.zip rain-${RAINVERS}_linux-arm64/ \
             ;; \
         *) \
             echo "ERROR: Unknown architecture. Bailing out now."; \

@@ -22,9 +22,9 @@ cfnlint-describe() {
     echo "Lint Cloudformation files with cfn-lint"
 }
 
-export LINTERS+=('cfnfmt')
+export LINTERS+=('rainfmt')
 
-cfnfmt() {
+rainfmt() {
     local lint_files
     if [[ $1 == "-f" ]]; then
         lint_files="$2"
@@ -34,13 +34,13 @@ cfnfmt() {
         lint_files="$(echo "$files" | grep -E "$fpattern" | xargs grep -l '"\?AWSTemplateFormatVersion"\?:' || true)"
     fi
     while read -r file; do
-        if ! cfn-format -v "$file" ; then
-            fail "$file" cfn-format
+        if ! rain fmt -v "$file" ; then
+            fail "$file" "rain fmt"
         fi
     done < <(echo "$lint_files" | sed '/^$/d')
 }
 
-cfnfmt-describe() {
-    echo "Lint Cloudformation files with cfn-format"
+rainfmt-describe() {
+    echo "Lint Cloudformation files with rain fmt"
 }
 
