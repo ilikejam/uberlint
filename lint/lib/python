@@ -52,7 +52,7 @@ mypyed() {
         lint_files="$(echo "$files" | grep -E "$fpattern" || true)"
     fi
     while read -r file; do
-        mypy --ignore-missing-imports --disable-error-code=import-untyped --no-error-summary "$file" || fail "$file" mypy
+        mypy --follow-imports=silent --ignore-missing-imports --disable-error-code=import-untyped --no-error-summary "$file" || fail "$file" mypy
     done < <(echo "$lint_files" | sed '/^$/d')
 }
 
