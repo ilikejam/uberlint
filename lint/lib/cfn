@@ -26,6 +26,7 @@ export LINTERS+=('rainfmt')
 
 rainfmt() {
     local lint_files
+    local fmt_command="rain fmt -v"
     if [[ $1 == "-f" ]]; then
         lint_files="$2"
     else
@@ -34,7 +35,8 @@ rainfmt() {
         lint_files="$(echo "$files" | grep -E "$fpattern" | xargs grep -l '"\?AWSTemplateFormatVersion"\?:' || true)"
     fi
     while read -r file; do
-        if ! rain fmt -v "$file" ; then
+        [[ "$file" == *.json ]] && fmt_command+=" --json"
+        if ! $fmt_command "$file" ; then
             fail "$file" "rain fmt"
         fi
     done < <(echo "$lint_files" | sed '/^$/d')
