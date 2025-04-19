@@ -39,7 +39,6 @@ RUN apt-get update && \
         ansible-lint==$ANSIBLELINTVERS \
         black \
         cfn-lint \
-        hvac \
         isort \
         jmespath \
         mypy \
@@ -52,7 +51,8 @@ RUN apt-get update && \
         eslint-plugin-immutable && \
     npx -y install-peerdeps --global \
         eslint-config-airbnb && \
-    gem install rubocop:$RUBOCOPVERS && \
+    npm cache clean --force && \
+    gem install -N rubocop:$RUBOCOPVERS && \
     arch="$(uname -m)" && \
     case "$arch" in \
         x86_64) \
